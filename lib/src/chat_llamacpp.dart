@@ -6,14 +6,20 @@ import 'package:langchain_llamacpp/src/types.dart';
 import 'package:llama_cpp_dart/llama_cpp_dart.dart';
 
 class ChatLlamacpp extends BaseChatModel<ChatLlamaOptions>{
+  late LlamaModelParams mParams;
+  late LlamaCtxParams cParams;
+  late Llama llama;
+  
   ChatLlamacpp({
     required final String modelPath,
     required super.defaultOptions,
   }){
+    mParams = LlamaModelParams(nGpuLayers: defaultOptions.numGpuLayers);
+    cParams = LlamaCtxParams(nCtx: defaultOptions.numCtx, nThreads: 8, nThreadsbatch: 8);
+    llama = Llama(mParams: mParams, cParams: cParams);
+
     llama.loadModel(modelPath);
   }
-
-  final Llama llama = Llama();
 
   @override
   String get modelType => 'llama.cpp';
