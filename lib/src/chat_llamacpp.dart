@@ -25,6 +25,11 @@ class ChatLlamacpp extends BaseChatModel<ChatLlamaOptions>{
   String get modelType => 'llama.cpp';
 
   @override
+  void close(){
+    llama.dispose();
+  }
+
+  @override
   Future<ChatResult> invoke(
     final PromptValue input, {
     final ChatLlamaOptions? options 
