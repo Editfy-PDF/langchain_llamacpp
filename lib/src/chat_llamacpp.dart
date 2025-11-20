@@ -29,6 +29,10 @@ class ChatLlamacpp extends BaseChatModel<ChatLlamaOptions>{
     llama.dispose();
   }
 
+  void stop(){
+    llama.sendStop();
+  }
+
   @override
   Future<ChatResult> invoke(
     final PromptValue input, {
