@@ -2,11 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:langchain_core/chat_models.dart';
 import 'package:langchain_core/tools.dart';
 
-/// {@template fllama_options}
-/// Options to pass into the Fllama LLM.
-///
-/// For a complete documentation of each parameter, see the
-/// [Fllama API documentation](https://github.com/Telosnex/fllama).
+/// {@template llama_options}
+/// Options to pass into the Llama.cpp.
 /// {@endtemplate}
 @immutable
 class ChatLlamaOptions extends ChatModelOptions {
@@ -16,6 +13,7 @@ class ChatLlamaOptions extends ChatModelOptions {
     this.mmproj,
     double? temperature,
     int? maxTokens,
+    int? topK,
     double? topP,
     double? frequencyPenalty,
     double? presencePenalty,
@@ -26,6 +24,7 @@ class ChatLlamaOptions extends ChatModelOptions {
     super.tools,
   })  : _temperature = temperature,
         _maxTokens = maxTokens,
+        _topK = topK,
         _topP = topP,
         _frequencyPenalty = frequencyPenalty,
         _presencePenalty = presencePenalty,
@@ -36,6 +35,7 @@ class ChatLlamaOptions extends ChatModelOptions {
 
   final double? _temperature;
   final int? _maxTokens;
+  final int? _topK;
   final double? _topP;
   final double? _frequencyPenalty;
   final double? _presencePenalty;
@@ -44,6 +44,7 @@ class ChatLlamaOptions extends ChatModelOptions {
 
   double get temperature => _temperature ?? 0.3;
   int get maxTokens => _maxTokens ?? 512;
+  int get topK => _topK ?? 40;
   double get topP => _topP ?? 1;
   double get frequencyPenalty => _frequencyPenalty ?? 0;
   double get presencePenalty => _presencePenalty ?? 1.1;
@@ -57,6 +58,7 @@ class ChatLlamaOptions extends ChatModelOptions {
     String? mmproj,
     double? temperature,
     int? maxTokens,
+    int? topK,
     double? topP,
     double? frequencyPenalty,
     double? presencePenalty,
@@ -70,6 +72,7 @@ class ChatLlamaOptions extends ChatModelOptions {
       mmproj: mmproj ?? this.mmproj,
       temperature: temperature ?? this.temperature,
       maxTokens: maxTokens ?? this.maxTokens,
+      topK: topK ?? this.topK,
       topP: topP ?? this.topP,
       frequencyPenalty: frequencyPenalty ?? this.frequencyPenalty,
       presencePenalty: presencePenalty ?? this.presencePenalty,
@@ -88,6 +91,7 @@ class ChatLlamaOptions extends ChatModelOptions {
       mmproj: other?.mmproj,
       temperature: other?.temperature,
       maxTokens: other?.maxTokens,
+      topK: other?.topK,
       topP: other?.topP,
       frequencyPenalty: other?.frequencyPenalty,
       presencePenalty: other?.presencePenalty,
@@ -107,6 +111,7 @@ class ChatLlamaOptions extends ChatModelOptions {
             mmproj == other.mmproj &&
             temperature == other.temperature &&
             maxTokens == other.maxTokens &&
+            topK == other.topK &&
             topP == other.topP &&
             frequencyPenalty == other.frequencyPenalty &&
             presencePenalty == other.presencePenalty &&
@@ -123,6 +128,7 @@ class ChatLlamaOptions extends ChatModelOptions {
         mmproj.hashCode ^
         temperature.hashCode ^
         maxTokens.hashCode ^
+        topK.hashCode ^
         topP.hashCode ^
         frequencyPenalty.hashCode ^
         presencePenalty.hashCode ^

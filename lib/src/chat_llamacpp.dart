@@ -38,12 +38,32 @@ class ChatLlamacpp extends BaseChatModel<ChatLlamaOptions>{
     final PromptValue input, {
     final ChatLlamaOptions? options 
   }) async{
-    final List<ChatMessage> chatMessages = input.toChatMessages();
+    final params = options ?? super.defaultOptions;
+    final List<Map<String, String>> chatMessages = [];
+    for(final msg in input.toChatMessages()){
+      chatMessages.add({'role':
+        switch(msg){
+          AIChatMessage _ => 'assistant',
+          HumanChatMessage _ => 'user',
+          SystemChatMessage _ => 'system',
+          _ => throw Exception('Tipo de mensagem não suportado')
+        },
+        'content': msg.contentAsString
+      });
+    }
 
-    List<String> acumulated = List.generate(chatMessages.length, (i) => chatMessages[i].contentAsString);
-    var result = await llama.generate(acumulated.join('\n'));
+    final formated = llama.formatWithTemplate(chatMessages);
 
-    final promptUsage = llama.tokenize(acumulated.join('\n')).$1.length;
+    //List<String> acumulated = List.generate(chatMessages.length, (i) => chatMessages[i].contentAsString);
+    var result = await llama.generate(
+      formated,
+      isIsolated: true,
+      temp: params.temperature,
+      topK: params.topK,
+      topP: params.topP
+    );
+
+    final promptUsage = llama.tokenize(formated).$1.length;
     
     return ChatResult(
       id: List.generate(8, (_) => Random.secure().nextInt(16).toRadixString(16)).join(),
@@ -65,13 +85,33 @@ class ChatLlamacpp extends BaseChatModel<ChatLlamaOptions>{
     final PromptValue input, {
     final ChatLlamaOptions? options
   }) async*{
-    final chatMessages = input.toChatMessages();
-    final List<String> msgContent = List.generate(chatMessages.length, (i) =>chatMessages[i].contentAsString);
+    final params = options ?? super.defaultOptions;
+    final List<Map<String, String>> chatMessages = [];
+    for(final msg in input.toChatMessages()){
+      chatMessages.add({'role':
+        switch(msg){
+          AIChatMessage _ => 'assistant',
+          HumanChatMessage _ => 'user',
+          SystemChatMessage _ => 'system',
+          _ => throw Exception('Tipo de mensagem não suportado')
+        },
+        'content': msg.contentAsString
+      });
+    }
 
-    final promptUsage = llama.tokenize(msgContent.join('\n')).$1.length;
+    final formated = llama.formatWithTemplate(chatMessages);
+    
+    //final List<String> msgContent = List.generate(chatMessages.length, (i) =>chatMessages[i].contentAsString);
+
+    final promptUsage = llama.tokenize(formated).$1.length;
     final uuid = List.generate(8, (_) => Random.secure().nextInt(16).toRadixString(16)).join();
 
-    await for(final resp in llama.generateStreamed(msgContent.join('\n'))){
+    await for(final resp in llama.generateStreamed(
+      formated,
+      temp: params.temperature,
+      topK: params.topK,
+      topP: params.topP
+    )){
       yield ChatResult(
         id: uuid,
         output: AIChatMessage(content: resp),
